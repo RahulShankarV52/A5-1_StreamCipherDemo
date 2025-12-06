@@ -35,7 +35,7 @@ The tool provides an interactive "Glass Box" approach, allowing users to visuali
 
 ## 📸 Screenshots
 ### The Dashboard
-
+![UserInterface](img/img_1.png)
 ## 🚀 Usage
 Access the hosted version directly via GitHub Pages:
 [**Launch A5/1 Visualizer**](https://rahulshankarv52.github.io/A5-1_StreamCipherDemo/)
