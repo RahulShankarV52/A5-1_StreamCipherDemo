@@ -9,7 +9,7 @@
   ![Status](https://img.shields.io/badge/Status-Completed-success?style=flat-square)
 
   <p align="center">
-    <a href="">
+    <a href="https://rahulshankarv52.github.io/A5-1_StreamCipherDemo/">
       <img src="https://img.shields.io/badge/🚀_Launch-Live_Demo-FF7139?style=for-the-badge&logo=github" alt="Live Demo" />
     </a>
   </p>
@@ -39,7 +39,7 @@ The tool provides an interactive "Glass Box" approach, allowing users to visuali
 
 ## 🚀 Usage
 Access the hosted version directly via GitHub Pages:
-[**Launch A5/1 Visualizer**]()
+[**Launch A5/1 Visualizer**](https://rahulshankarv52.github.io/A5-1_StreamCipherDemo/)
 
 | ProjectTeamRole | Name |
 |-----------------|------|
