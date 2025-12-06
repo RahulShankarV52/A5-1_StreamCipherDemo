@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Implementation of A5/1 (GSM Standard)</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    
+    <header>
+        <h1>Implementation of A5/1 (GSM Standard)</h1>
+        <p class="subtitle">Stream Cipher Simulation & Analysis</p>
+    </header>
+
+    <main class="main-wrapper">
+        
+        <section class="info-section">
+            <div class="content-box">
+                <h2>1. Executive Summary</h2>
+                <p>
+                    A5/1 is a stream cipher developed in 1987 to protect voice communication in GSM mobile networks.
+                    It uses three Linear Feedback Shift Registers (LFSRs) with irregular clocking to generate a keystream.
+                </p>
+                <div class="specs-grid">
+                    <div class="spec-item">
+                        <strong>Architecture</strong>
+                        <p>3 LFSRs (19, 22, 23 bits)</p>
+                    </div>
+                    <div class="spec-item">
+                        <strong>Key Length</strong>
+                        <p>64-bit session key (Kc)</p>
+                    </div>
+                    <div class="spec-item">
+                        <strong>Clocking</strong>
+                        <p>Majority Vote Rule</p>
+                    </div>
+                    <div class="spec-item">
+                        <strong>Frame Number</strong>
+                        <p>22-bit public counter</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"><span>SYSTEM ARCHITECTURE</span></div>
+        
+        <section class="wiki-section">
+            <div class="wiki-grid">
+                <div class="wiki-card">
+                    <div class="wiki-icon">1</div>
+                    <h3>Register Initialization</h3>
+                    <p>The internal state consists of three LFSRs: <strong>R1 (19 bits)</strong>, <strong>R2 (22 bits)</strong>, and <strong>R3 (23 bits)</strong>.</p>
+                    <ul class="wiki-list">
+                        <li>The 64-bit key is XORed into the registers bit-by-bit.</li>
+                        <li>The 22-bit frame number is then XORed in.</li>
+                        <li>This "seeds" the random state of the machine.</li>
+                    </ul>
+                </div>
+
+                <div class="wiki-card">
+                    <div class="wiki-icon">2</div>
+                    <h3>Majority Vote Clocking</h3>
+                    <p>To prevent simple cryptanalysis, the registers do not move at the same time. This is the <strong>"Stop/Go"</strong> rule.</p>
+                    <ul class="wiki-list">
+                        <li>The system checks clock bits: R1[8], R2[10], R3[10].</li>
+                        <li>A "Majority Bit" is determined (e.g., if bits are 1, 1, 0 -> Majority is 1).</li>
+                        <li>Only registers matching the majority bit are clocked (shifted).</li>
+                    </ul>
+                </div>
+
+                <div class="wiki-card">
+                    <div class="wiki-icon">3</div>
+                    <h3>Keystream Generation</h3>
+                    <p>Once mixed, the system generates the encryption stream (Keystream) one bit at a time.</p>
+                    <ul class="wiki-list">
+                        <li>The Most Significant Bit (MSB) of R1, R2, and R3 are extracted.</li>
+                        <li>They are XORed together: <code>K = R1_out ⊕ R2_out ⊕ R3_out</code>.</li>
+                        <li>This bit <code>K</code> is XORed with the Message to encrypt it.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"><span>PROCESS LOGS</span></div>
+
+        <section class="terminal-section">
+            <div class="terminal-header">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+                <span class="terminal-title">system_log.sh</span>
+            </div>
+            <div class="terminal-window" id="console-display">
+                <div class="log-line"> <span class="cmd">></span> System ready. Waiting for initialization...</div>
+            </div>
+        </section>
+
+        <div class="divider"><span>INTERACTIVE MODULE</span></div>
+
+        <section class="container">
+            <section class="card" id="user1-panel">
+                <div class="card-header">
+                    <h2>User 1 (Sender)</h2>
+                </div>
+                <div class="card-body">
+                    <label for="inpmessu1">Input Message</label>
+                    <input type="text" id="inpmessu1" placeholder="Type plaintext...">
+                    
+                    <div class="button-group">
+                        <button class="btn btn-encrypt" onclick="encryptu1()">Encrypt</button>
+                        <button class="btn btn-decrypt" onclick="decryptu1()">Decrypt</button>
+                    </div>
+
+                    <label for="outmessu1">Output Stream</label>
+                    <input type="text" id="outmessu1" class="output-field" placeholder="Result (Hex)..." readonly>
+                </div>
+            </section>
+
+            <section class="card highlight" id="key-panel">
+                <div class="card-header">
+                    <h2>System Configuration</h2>
+                </div>
+                <div class="card-body">
+                    <label for="inputKey">64-bit Key (Hex)</label>
+                    <input type="text" id="inputKey" placeholder="e.g., EF432190AABBCCDD">
+                    
+                    <label for="inputFrame">Frame Number (Hex)</label>
+                    <input type="text" id="inputFrame" placeholder="e.g., 13F">
+                    
+                    <button class="btn btn-generate" onclick="generatekey()">Initialize Registers</button>
+                    <p class="status-text" id="status-indicator">STATUS: <span class="blink">IDLE</span></p>
+                </div>
+            </section>
+
+            <section class="card" id="user2-panel">
+                <div class="card-header">
+                    <h2>User 2 (Receiver)</h2>
+                </div>
+                <div class="card-body">
+                    <label for="inpmessu2">Input Message</label>
+                    <input type="text" id="inpmessu2" placeholder="Type ciphertext (Hex)...">
+                    
+                    <div class="button-group">
+                        <button class="btn btn-encrypt" onclick="encryptu2()">Encrypt</button>
+                        <button class="btn btn-decrypt" onclick="decryptu2()">Decrypt</button>
+                    </div>
+
+                    <label for="outmessu2">Output Stream</label>
+                    <input type="text" id="outmessu2" class="output-field" placeholder="Result..." readonly>
+                </div>
+            </section>
+        </section>
+
+        <div class="divider"><span>PROJECT DETAILS</span></div>
+        
+        <section class="credits-section">
+            <div class="content-box">
+                <div class="credits-grid">
+                    <div class="team-column">
+                        <h2>Project Team</h2>
+                        <table class="credits-table">
+                            <thead>
+                                <tr>
+                                    <th>Role</th>
+                                    <th>Member Name</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Mentor</td>
+                                    <td class="highlight-text">Mr. Saurabh Shrivastava</td>
+                                </tr>
+                                <tr>
+                                    <td>Member</td>
+                                    <td>R. Sruthi</td>
+                                </tr>
+                                <tr>
+                                    <td>Member</td>
+                                    <td>Rahul Shankar. V</td>
+                                </tr>
+                                <tr>
+                                    <td>Member</td>
+                                    <td>Rathnesh</td>
+                                </tr>
+                                <tr>
+                                    <td>Member</td>
+                                    <td>Ramraj S</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="refs-column">
+                        <h2>References</h2>
+                        <ul class="ref-list">
+                            <li>
+                                <a href="https://asecuritysite.com/symmetric/a5" target="_blank" class="ref-link">
+                                    <span class="icon">🔗</span> A5/1 Stream Cipher Theory
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://github.com/dkushagra/a51-python" target="_blank" class="ref-link">
+                                    <span class="icon">🐍</span> Python Implementation
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2024 A5/1 Implementation Project</p>
+    </footer>
+
+    <script src="js/A51enc.js"></script>
+</body>
+</html>
