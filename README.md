@@ -35,7 +35,6 @@ The tool provides an interactive "Glass Box" approach, allowing users to visuali
 
 ## 📸 Screenshots
 ### The Dashboard
-![User Interface](img/img1_png)
 
 ## 🚀 Usage
 Access the hosted version directly via GitHub Pages:
